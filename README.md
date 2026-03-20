@@ -359,6 +359,7 @@ Adapters are used by both `export` and `run`. Available adapters:
 | `opencode` | OpenCode instructions + config |
 | `openclaw` | OpenClaw format |
 | `nanobot` | Nanobot format |
+| `langchain` | LangChain agent Python code |
 
 ```bash
 # Export to system prompt
