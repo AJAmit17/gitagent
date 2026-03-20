@@ -8,6 +8,8 @@ import {
   exportToCrewAI,
   exportToOpenClawString,
   exportToNanobotString,
+  exportToCopilotString,
+  exportToOpenCodeString,
   exportToLangChain,
 } from '../adapters/index.js';
 import { exportToLyzrString } from '../adapters/lyzr.js';
@@ -21,7 +23,7 @@ interface ExportOptions {
 
 export const exportCommand = new Command('export')
   .description('Export agent to other formats')
-  .requiredOption('-f, --format <format>', 'Export format (system-prompt, claude-code, openai, crewai, openclaw, nanobot, lyzr, github, langchain)')
+  .requiredOption('-f, --format <format>', 'Export format (system-prompt, claude-code, openai, crewai, openclaw, nanobot, lyzr, github, copilot, opencode, langchain)')
   .option('-d, --dir <dir>', 'Agent directory', '.')
   .option('-o, --output <output>', 'Output file path')
   .action(async (options: ExportOptions) => {
@@ -58,12 +60,18 @@ export const exportCommand = new Command('export')
         case 'github':
           result = exportToGitHubString(dir);
           break;
+        case 'copilot':
+          result = exportToCopilotString(dir);
+          break;
+        case 'opencode':
+          result = exportToOpenCodeString(dir);
+          break;
         case 'langchain':
           result = exportToLangChain(dir);
           break;
         default:
           error(`Unknown format: ${options.format}`);
-          info('Supported formats: system-prompt, claude-code, openai, crewai, openclaw, nanobot, lyzr, github, langchain');
+          info('Supported formats: system-prompt, claude-code, openai, crewai, openclaw, nanobot, lyzr, github, copilot, opencode, langchain');
           process.exit(1);
       }
 

@@ -158,6 +158,80 @@ Define `bootstrap.md` and `teardown.md` in the `hooks/` folder to control what a
 
 <img src="patterns/agent-automation-hooks.png" alt="Agent Lifecycle Hooks" width="600" />
 
+### SkillsFlow
+Deterministic, multi-step workflows defined in `workflows/` as YAML. Chain `skill:`, `agent:`, and `tool:` steps with `depends_on` ordering, `${{ }}` template data flow, and per-step `prompt:` overrides. Every run follows the same path — no LLM discretion on execution order.
+
+```yaml
+name: code-review-flow
+description: Full code review pipeline
+triggers:
+  - pull_request
+
+steps:
+  lint:
+    skill: static-analysis
+    inputs:
+      path: ${{ trigger.changed_files }}
+
+  review:
+    agent: code-reviewer
+    depends_on: [lint]
+    prompt: |
+      Focus on security and performance.
+      Flag any use of eval() or raw SQL.
+    inputs:
+      findings: ${{ steps.lint.outputs.issues }}
+
+  test:
+    tool: bash
+    depends_on: [lint]
+    inputs:
+      command: "npm test -- --coverage"
+
+  report:
+    skill: review-summary
+    depends_on: [review, test]
+    conditions:
+      - ${{ steps.review.outputs.severity != 'none' }}
+    inputs:
+      review: ${{ steps.review.outputs.comments }}
+      coverage: ${{ steps.test.outputs.report }}
+
+error_handling:
+  on_failure: notify
+  channel: "#eng-reviews"
+```
+
+### Porting Framework Agents to GitAgent
+
+Agents built in frameworks like NVIDIA AIQ, LangGraph, or CrewAI have their identity split across config files, Jinja2 templates, and Python code. gitagent extracts the **identity layer** — prompts, rules, roles, tool schemas — into a portable, versionable format.
+
+> **What ports cleanly:** system prompts, persona definitions, hard constraints, tool schemas, role/SOD policies, model preferences.
+>
+> **What stays in the framework:** runtime orchestration (state machines, graph wiring), live tool execution, memory I/O, iterative loops.
+
+This pattern is demonstrated with [NVIDIA's AIQ Deep Researcher](https://github.com/NVIDIA-AI-Blueprints/aiq) — a 3-agent hierarchy (orchestrator → planner → researcher) that produces cited research reports. The gitagent version captures the agent's identity, rules, and SOD policy so you can:
+
+- **Fork for a new domain** — edit `SOUL.md` for legal/medical/finance research without touching Python
+- **Version prompts independently** — `git diff` when the orchestrator's style regresses
+- **Validate SOD** — `gitagent validate --compliance` ensures the orchestrator can't also be the researcher
+- **Export to other runtimes** — same identity on Claude Code, OpenAI, or as a raw system prompt
+
+```
+examples/nvidia-deep-researcher/
+├── agent.yaml                  # Manifest + SOD policy
+├── SOUL.md                     # Orchestrator identity (from orchestrator.j2)
+├── RULES.md                    # Citation rules, report constraints
+├── DUTIES.md                   # Role separation: orchestrator ↔ planner ↔ researcher
+├── agents/planner/             # Planner sub-agent (from planner.j2)
+├── agents/researcher/          # Researcher sub-agent (from researcher.j2)
+├── skills/{web,paper,knowledge}-search/
+├── tools/*.yaml                # MCP-compatible tool schemas
+└── config/                     # Model assignments per environment
+```
+
+See [`examples/nvidia-deep-researcher/`](examples/nvidia-deep-researcher/) for the full working example.
+
 ## Quick Start
 
 ```bash
@@ -232,7 +306,7 @@ compliance:
 | `gitagent validate [--compliance]` | Validate against spec and regulatory requirements |
 | `gitagent info` | Display agent summary |
 | `gitagent export --format <fmt>` | Export to other formats (see adapters below) |
-| `gitagent import --from <fmt> <path>` | Import (`claude`, `cursor`, `crewai`) |
+| `gitagent import --from <fmt> <path>` | Import (`claude`, `cursor`, `crewai`, `opencode`) |
 | `gitagent run <source> --adapter <a>` | Run an agent from a git repo or local directory |
 | `gitagent install` | Resolve and install git-based dependencies |
 | `gitagent audit` | Generate compliance audit report |
@@ -282,6 +356,7 @@ Adapters are used by both `export` and `run`. Available adapters:
 | `lyzr` | Lyzr Studio agent |
 | `github` | GitHub Actions agent |
 | `git` | Git-native execution (run only) |
+| `opencode` | OpenCode instructions + config |
 | `openclaw` | OpenClaw format |
 | `nanobot` | Nanobot format |
 | `langchain` | LangChain agent Python code |

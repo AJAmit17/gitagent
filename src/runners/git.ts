@@ -11,6 +11,7 @@ import { runWithOpenClaw } from './openclaw.js';
 import { runWithNanobot } from './nanobot.js';
 import { runWithLyzr } from './lyzr.js';
 import { runWithGitHub } from './github.js';
+import { runWithOpenCode } from './opencode.js';
 import { runWithLangChain } from './langchain.js';
 import { error, info, success, label, heading, divider, warn } from '../utils/format.js';
 
@@ -104,6 +105,9 @@ export async function runWithGit(
       case 'nanobot':
         runWithNanobot(agentDir, manifest, { prompt: options.prompt });
         break;
+      case 'opencode':
+        runWithOpenCode(agentDir, manifest, { prompt: options.prompt });
+        break;
       case 'lyzr':
         await runWithLyzr(agentDir, manifest, { prompt: options.prompt });
         break;
@@ -181,6 +185,10 @@ function detectAdapter(agentDir: string, manifest: AgentManifest): string {
   if (existsSync(join(agentDir, '.github_models'))) {
     info('Auto-detected adapter: github (from .github_models)');
     return 'github';
+  }
+  if (existsSync(join(agentDir, 'opencode.json'))) {
+    info('Auto-detected adapter: opencode (from opencode.json)');
+    return 'opencode';
   }
 
   // 4. Default
