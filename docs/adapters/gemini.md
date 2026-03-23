@@ -41,7 +41,7 @@ gemini --version
 | `skills/*/SKILL.md` | `GEMINI.md` (skills section) | Progressive disclosure with full instructions |
 | `tools/*.yaml` | `.gemini/settings.json` → `allowedTools` | Tool names extracted from YAML |
 | `knowledge/` (always_load) | `GEMINI.md` (knowledge section) | Reference documents embedded |
-| `manifest.model.preferred` | `.gemini/settings.json` → `model` | Model selection (e.g., `gemini-2.0-flash-exp`) |
+| `manifest.model.preferred` | `.gemini/settings.json` → `model` | Model object with `id` and `provider` (e.g., `{"id": "gemini-2.0-flash-exp", "provider": "google"}`) |
 | `manifest.compliance.supervision.human_in_the_loop` | CLI flag `--approval-mode` | Approval mode mapping (see below) |
 | `hooks/hooks.yaml` | `.gemini/settings.json` → `hooks` | Lifecycle event handlers |
 | `agents/` (sub-agents) | `GEMINI.md` (delegation section) | Documented as pattern (no native support) |
@@ -111,7 +111,10 @@ Agent description
 
 # === .gemini/settings.json ===
 {
-  "model": "gemini-2.0-flash-exp",
+  "model": {
+    "id": "gemini-2.0-flash-exp",
+    "provider": "google"
+  },
   "allowedTools": ["bash", "edit", "read"],
   "approvalMode": "default",
   "hooks": {...}
@@ -249,15 +252,15 @@ When importing `GEMINI.md`, sections are split based on keywords:
 
 ### Event Name Mapping
 
-| gitagent Event | Gemini CLI Event |
-|---------------|------------------|
-| `on_session_start` | `session_start` |
-| `pre_tool_use` | `pre_tool_use` |
-| `post_tool_use` | `post_tool_use` |
-| `pre_response` | `pre_response` |
-| `post_response` | `post_response` |
-| `on_error` | `on_error` |
-| `on_session_end` | `session_end` |
+| gitagent Event | Gemini CLI Event | Notes |
+|---------------|------------------|-------|
+| `on_session_start` | `SessionStart` | Runs at session initialization |
+| `pre_tool_use` | `BeforeTool` | Runs before tool execution |
+| `post_tool_use` | `AfterTool` | Runs after tool execution |
+| `pre_response` | `AfterModel` | Runs after model generates response |
+| `post_response` | `AfterAgent` | Runs after agent loop completes |
+| `on_error` | `Notification` | Error notifications |
+| `on_session_end` | `SessionEnd` | Runs at session cleanup |
 
 ### Hook Format
 
@@ -273,15 +276,24 @@ hooks:
 ```json
 {
   "hooks": {
-    "session_start": [
+    "SessionStart": [
       {
-        "script": "scripts/init.sh",
-        "description": "Initialize session"
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "hook-0",
+            "type": "command",
+            "command": "bash hooks/scripts/init.sh",
+            "description": "Initialize session"
+          }
+        ]
       }
     ]
   }
 }
 ```
+
+**Note:** On Windows, commands are prefixed with `bash` to enable execution through PowerShell. On Linux/macOS, the `bash` prefix is omitted.
 
 ## Best Practices
 
