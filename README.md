@@ -360,6 +360,7 @@ Adapters are used by both `export` and `run`. Available adapters:
 | `gemini` | Google Gemini CLI (GEMINI.md + settings.json) |
 | `openclaw` | OpenClaw format |
 | `nanobot` | Nanobot format |
+| `cursor` | Cursor `.cursor/rules/*.mdc` files |
 
 ```bash
 # Export to system prompt
