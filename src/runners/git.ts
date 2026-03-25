@@ -12,6 +12,7 @@ import { runWithNanobot } from './nanobot.js';
 import { runWithLyzr } from './lyzr.js';
 import { runWithGitHub } from './github.js';
 import { runWithOpenCode } from './opencode.js';
+import { runWithLangChain } from './langchain.js';
 import { error, info, success, label, heading, divider, warn } from '../utils/format.js';
 
 export interface GitRunOptions {
@@ -112,6 +113,9 @@ export async function runWithGit(
         break;
       case 'github':
         await runWithGitHub(agentDir, manifest, { prompt: options.prompt });
+        break;
+      case 'langchain':
+        runWithLangChain(agentDir, manifest);
         break;
       case 'prompt':
         console.log(exportToSystemPrompt(agentDir));
