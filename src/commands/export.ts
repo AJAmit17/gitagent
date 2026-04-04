@@ -13,7 +13,7 @@ import {
   exportToCursorString,
   exportToGeminiString,
   exportToCodexString,
-  exportToLangChain
+  exportToLangChain,
   exportToKiroString,
   exportToGitclawString,
 } from '../adapters/index.js';
