@@ -451,7 +451,7 @@ function importFromGemini(sourcePath: string, targetDir: string): void {
     else if (approvalMode === 'default') hitl = 'conditional';
     else if (approvalMode === 'yolo') hitl = 'none';
     else if (approvalMode === 'auto_edit') hitl = 'advisory';
-    
+
     if (hitl) {
       agentYaml.compliance = {
         supervision: {

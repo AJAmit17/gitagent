@@ -10,3 +10,5 @@ export { exportToCursorString, exportToCursor } from './cursor.js';
 export { exportToGeminiString, exportToGemini } from './gemini.js';
 export { exportToCodexString, exportToCodex } from './codex.js';
 export { exportToLangChain } from './langchain.js';
+export { exportToKiroString, exportToKiro } from './kiro.js';
+export { exportToGitclawString, exportToGitclaw } from './gitclaw.js';
