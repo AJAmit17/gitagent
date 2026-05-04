@@ -9,6 +9,7 @@ import { error, info } from '../utils/format.js';
 
 export interface OpenCodeRunOptions {
   prompt?: string;
+  workspace?: string;
 }
 
 /**
@@ -21,9 +22,13 @@ export interface OpenCodeRunOptions {
  * Then launches `opencode` in that workspace. OpenCode reads both files
  * automatically on startup.
  *
- * Supports both interactive mode (no prompt) and single-shot mode (`opencode run -p`).
+ * Supports both interactive mode (no prompt) and single-shot mode (`opencode run "<message>"`).
  */
 export function runWithOpenCode(agentDir: string, manifest: AgentManifest, options: OpenCodeRunOptions = {}): void {
+  if (options.workspace) {
+    info('--workspace is not applied to OpenCode because it reads AGENTS.md and opencode.json from the prepared temporary workspace.');
+  }
+
   const exp = exportToOpenCode(agentDir);
 
   // Create a temporary workspace
@@ -45,9 +50,10 @@ export function runWithOpenCode(agentDir: string, manifest: AgentManifest, optio
   // Build opencode CLI args
   const args: string[] = [];
 
-  // Single-shot mode uses `opencode run --prompt "..."`, interactive is just `opencode`
+  // Single-shot mode: `opencode run "<message>"` — prompt is a positional arg.
+  // Note: opencode's `-p` / `--password` is NOT for prompts; the prompt goes as positional message.
   if (options.prompt) {
-    args.push('run', '--prompt', options.prompt);
+    args.push('run', options.prompt);
   }
 
   info(`Launching OpenCode agent "${manifest.name}"...`);
