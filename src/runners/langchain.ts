@@ -55,8 +55,8 @@ export function runWithLangChain(agentDir: string, _manifest: AgentManifest, opt
     process.exit(1);
   }
 
-  // Persistent venv at ~/.gitagent/gitagent-env — reused across runs
-  const venvDir = join(homedir(), '.gitagent', 'gitagent-env');
+  // Persistent venv at ~/.gitagent/langchain-venv — reused across runs
+  const venvDir = join(homedir(), '.gitagent', 'langchain-venv');
   const packages = ['langchain', 'langchain-core', providerInfo.pipPackage];
 
   // --- Step 1: create venv if it doesn't exist ---
