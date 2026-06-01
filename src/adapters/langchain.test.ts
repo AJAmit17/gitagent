@@ -9,7 +9,8 @@ import { mkdtempSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 
-import { exportToLangChain, detectProvider } from './langchain.js';
+import { exportToLangChainString as exportToLangChain } from './langchain.js';
+import { detectProvider } from './langchain-utils.js';
 
 // ---------------------------------------------------------------------------
 // Helpers

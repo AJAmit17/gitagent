@@ -15,7 +15,7 @@ import {
   exportToCodexString,
   exportToKiroString,
   exportToGitclawString,
-  exportToLangChain,
+  exportToLangChainString,
 } from '../adapters/index.js';
 import { exportToLyzrString } from '../adapters/lyzr.js';
 import { exportToGitHubString } from '../adapters/github.js';
@@ -87,7 +87,7 @@ export const exportCommand = new Command('export')
           result = exportToGitclawString(dir);
           break;
         case 'langchain':
-          result = exportToLangChain(dir);
+          result = exportToLangChainString(dir);
           break;
         default:
           error(`Unknown format: ${options.format}`);

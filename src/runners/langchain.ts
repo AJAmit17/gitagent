@@ -3,7 +3,8 @@ import { join } from 'node:path';
 import { tmpdir, homedir, platform } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { exportToLangChain, detectProvider } from '../adapters/langchain.js';
+import { exportToLangChainString } from '../adapters/langchain.js';
+import { detectProvider } from '../adapters/langchain-utils.js';
 import { AgentManifest } from '../utils/loader.js';
 import { error, info } from '../utils/format.js';
 
@@ -96,7 +97,7 @@ export function runWithLangChain(agentDir: string, _manifest: AgentManifest, opt
   }
 
   // --- Step 3: write + run script ---
-  const script = exportToLangChain(agentDir);
+  const script = exportToLangChainString(agentDir);
   const tmpFile = join(tmpdir(), `gitagent-langchain-${randomBytes(4).toString('hex')}.py`);
   writeFileSync(tmpFile, script, 'utf-8');
 

@@ -3,31 +3,9 @@ import { join, resolve } from 'node:path';
 import yaml from 'js-yaml';
 import { loadAgentManifest, loadFileIfExists, AgentManifest } from '../utils/loader.js';
 import { loadAllSkills, getAllowedTools } from '../utils/skill-loader.js';
+import { detectProvider } from './langchain-utils.js';
 
-// ---------------------------------------------------------------------------
-// Provider detection — maps model name prefixes to pip packages + env vars
-// ---------------------------------------------------------------------------
-interface ProviderInfo {
-  provider: string;
-  pipPackage: string;
-  envVar: string;
-}
-
-/** Supported providers. Returns null for any unsupported model. */
-function detectProvider(model: string): ProviderInfo | null {
-  const m = model.toLowerCase();
-  // Anthropic — claude-*
-  if (m.startsWith('claude'))  return { provider: 'anthropic', pipPackage: 'langchain-anthropic', envVar: 'ANTHROPIC_API_KEY' };
-  // OpenAI — gpt-*, o1-*, o2-*, o3-*, o4-*
-  if (m.startsWith('gpt') || /^o\d/.test(m)) return { provider: 'openai', pipPackage: 'langchain-openai', envVar: 'OPENAI_API_KEY' };
-  // Unsupported model
-  return null;
-}
-
-// Make detectProvider available for tests
-export { detectProvider };
-
-export function exportToLangChain(dir: string): string {
+export function exportToLangChainString(dir: string): string {
   const agentDir = resolve(dir);
   const manifest = loadAgentManifest(agentDir);
 
